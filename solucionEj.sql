@@ -150,16 +150,18 @@ BEGIN
 	 -- 1ro ponemos las reglas de negocio correspondientes
 	IF p_hobby_viejo_id = p_hobby_nuevo_id THEN
 		SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'No se puede fusionar un hobby consigo mismo';
+			SET MESSAGE_TEXT = 'RN010: No se puede fusionar un hobby consigo mismo';
 	END IF;
 	
-	IF NOT 
-	
+	IF NOT EXISTS (SELECT * FROM hobbies h WHERE h.hobby_id = p_hobby_viejo_id) OR NOT EXISTS (SELECT * FROM hobbies h WHERE h.hobby_id = p_hobby_nuevo_id) THEN
+			SIGNAL SQLSTATE '45000'
+				SET MESSAGE_TEXT = 'R10: Las dos aficiones deben estar en el catálogo.';
+	END IF;
 	
 	DELETE FROM users_hobbies 
 	WHERE hobby_id = p_hobby_viejo_id AND user_id IN (SELECT uh.user_id FROM users_hobbies uh WHERE uh.hobby_id = p_hobby_nuevo_id);
 	
-	UPDATE users hobbies SET hobby_id = p_hobby_nuevo_id WHERE hobby_id = p_hobby_viejo_id;
+	UPDATE users_hobbies SET hobby_id = p_hobby_nuevo_id WHERE hobby_id = p_hobby_viejo_id;
 END//
 DELIMITER ;
 
@@ -193,7 +195,7 @@ SELECT h.hobby_id, h.hobby_name, f_hobby_users(h.hobby_id) AS users
 FROM hobbies h
 ORDER BY users DESC, h.hobby_id;
 
-CALL p_merge_hobbies_transactional(4,1);
+CALL p_merge_hobbies_transactional(3,1);
 
 SELECT h.hobby_id, h.hobby_name, f_hobby_users(h.hobby_id) AS users
 FROM hobbies h
