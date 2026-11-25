@@ -55,11 +55,11 @@ CREATE TABLE users_hobbies (
     FOREIGN KEY (hobby_id) REFERENCES hobbies(hobby_id),
     CONSTRAINT uq_users_hobbies_rn03 UNIQUE (user_id, hobby_id),
     CONSTRAINT rn_nivel_tipos CHECK (nivel IN ('PRINCIPIANTE', 'INTERMEDIO', 'EXPERTO')),
-    CONSTRAINT ra01_practica_horas CHECK (horas_semana BETWEEN 1 AND 20),
+    CONSTRAINT ra01_practica_horas CHECK (horas_semana BETWEEN 1 AND 20)
 );
 
 -- --------------------------------------------------------------------------------------------
--- RA02: solo se es experto en una afición a la que se le dedican mas de 5 horas
+-- RA02: solo se es EXPERTO en una afición a la que se le dedican mas de 5 horas
 -- --------------------------------------------------------------------------------------------
 DELIMITER //
 CREATE OR REPLACE TRIGGER t_biu_practica_ra02 
@@ -78,5 +78,41 @@ BEGIN
 END //
 DELIMITER ;
 				
-
+-- --------------------------------------------------------------------------------------------
+-- RA03: Un usuario no dedica más de 30 horas a la semana al total de sus aficiones
+-- --------------------------------------------------------------------------------------------
+DELIMITER //
+CREATE OR REPLACE TRIGGER t_biu_horas_ra03
+BEFORE INSERT OR UPDATE ON users_hobbies
+FOR EACH ROW 
+BEGIN 
+	DECLARE v_horas_totales INT;
 	
+	SELECT COALESCE(SUM(horas_semana), 0) + NEW.horas_semana INTO v_horas_totales FROM users_hobbies WHERE user_id = NEW.user_id;
+	
+	IF v_horas_totales > 30 THEN
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'RA03: Un usuario no puede dedicar más de 30 horas a la semana al total de sus aficiones';
+	END IF;
+END //
+DELIMITER ;
+
+
+-- --------------------------------------------------------------------------------------------
+-- RA04: Un usuario no es EXPERTO en más de dos aficiones
+-- --------------------------------------------------------------------------------------------
+DELIMITER //
+CREATE OR REPLACE TRIGGER t_biu_limite_experto_ra04
+BEFORE INSERT OR UPDATE ON users_hobbies
+FOR EACH ROW
+BEGIN 
+	DECLARE v_suma_experto INT;
+	
+	SELECT COUNT(*) INTO v_suma_experto FROM users_hobbies WHERE user_id = NEW.user_id AND nivel = 'EXPERTO';
+	
+	IF v_suma_experto > 2 THEN
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'RA04: El usuario no puede ser EXPERTO en más de dos aficiones';
+	END IF;
+END //
+DELIMITER; 
