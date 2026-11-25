@@ -108,9 +108,9 @@ FOR EACH ROW
 BEGIN 
 	DECLARE v_suma_experto INT;
 	
-	SELECT COUNT(*) INTO v_suma_experto FROM users_hobbies WHERE user_id = NEW.user_id AND nivel = 'EXPERTO';
+	SELECT COUNT(*) INTO v_suma_experto FROM users_hobbies WHERE user_id = NEW.user_id AND nivel = 'EXPERTO' AND hobby_id <> NEW.hobby_id;
 	
-	IF v_suma_experto > 2 THEN
+	IF v_suma_experto >= 2 AND NEW.nivel = 'EXPERTO' THEN
 		SIGNAL SQLSTATE '45000'
 			SET MESSAGE_TEXT = 'RA04: El usuario no puede ser EXPERTO en más de dos aficiones';
 	END IF;
