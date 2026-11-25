@@ -80,6 +80,23 @@ END //
 DELIMITER ;
 
 -- =============================================================
+-- TESTS (RA01 - RA04) (manual) 
+-- =============================================================
+CALL p_populate();
+-- RA01: (horas actividad entre 1 y 20) 
+INSERT INTO users_hobbies (user_id, hobby_id, nivel, horas_semana) VALUES (6,4, 'EXPERTO', 21);
+
+-- RA02: solo se es EXPERTO en una afición a la que se le dedican mas de 5 horas
+INSERT INTO users_hobbies (user_id, hobby_id, nivel, horas_semana) VALUES (1,1, 'EXPERTO', 3);
+
+-- RA03: Un usuario no dedica más de 30 horas a la semana al total de sus aficiones
+INSERT INTO users_hobbies (user_id, hobby_id, nivel, horas_semana) VALUES (1,5, 'EXPERTO', 30);
+
+-- RA04: Un usuario no es EXPERTO en más de dos aficiones
+INSERT INTO users_hobbies (user_id, hobby_id, nivel, horas_semana) VALUES (6,5, 'EXPERTO', 6);
+INSERT INTO users_hobbies (user_id, hobby_id, nivel, horas_semana) VALUES (6,1, 'EXPERTO', 5);
+
+-- =============================================================
 -- ORQUESTADOR
 -- =============================================================
 DELIMITER //

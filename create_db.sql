@@ -69,8 +69,8 @@ BEGIN
 	DECLARE v_horas INT;
 	
 	IF NEW.nivel = 'EXPERTO' THEN
-		SELECT horas_semana INTO v_horas FROM users_hobbies WHERE user_hobby_id = NEW.user_hobby_id;
-		IF v_horas < 5 THEN
+		SET v_horas = NEW.horas_semana;
+		IF v_horas < 5 THEN    
 			SIGNAL SQLSTATE '45000'
 				SET MESSAGE_TEXT = 'RA02: No se puede ser EXPERTO en una afición si no le dedicas más de 5 horas semanales';
 		END IF;
