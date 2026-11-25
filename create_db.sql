@@ -115,4 +115,4 @@ BEGIN
 			SET MESSAGE_TEXT = 'RA04: El usuario no puede ser EXPERTO en más de dos aficiones';
 	END IF;
 END //
-DELIMITER; 
+DELIMITER ; 
